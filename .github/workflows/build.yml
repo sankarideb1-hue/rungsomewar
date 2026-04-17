@@ -1,0 +1,33 @@
+name: Build PC Executables
+
+on: [push]
+
+jobs:
+  windows-build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup MSYS2
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        update: true
+        install: >-
+          mingw-w64-x86_64-gcc
+          mingw-w64-x86_64-SDL2
+          mingw-w64-x86_64-SDL2_ttf
+
+    - name: Compile Programs
+      shell: msys2 {0}
+      run: |
+        g++ watermark.cxx -o watermark.exe -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf -mwindows
+        g++ watchdog.cxx -o watchdog.exe -lmingw32 -mwindows
+
+    - name: Save Finished Files
+      uses: actions/upload-artifact@v4
+      with:
+        name: PC-Deployment-Kit
+        path: "*.exe"
