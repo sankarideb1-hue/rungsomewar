@@ -12,12 +12,12 @@ if not exist "%TARGET_DIR%" mkdir "%TARGET_DIR%"
 echo Downloading components using curl...
 
 :: Download each file using your raw GitHub links
-curl -L -o "%TARGET_DIR%\SDL2.dll" "https://github.com/sankarideb1-hue/rungsomewar/raw/refs/heads/main/SDL2.dll"
-curl -L -o "%TARGET_DIR%\SDL2_ttf.dll" "https://github.com/sankarideb1-hue/rungsomewar/raw/refs/heads/main/SDL2_ttf.dll"
-curl -L -o "%TARGET_DIR%\libfreetype-6.dll" "https://github.com/sankarideb1-hue/rungsomewar/raw/refs/heads/main/libfreetype-6.dll"
-curl -L -o "%TARGET_DIR%\zlib1.dll" "https://github.com/sankarideb1-hue/rungsomewar/raw/refs/heads/main/zlib1.dll"
-curl -L -o "%TARGET_DIR%\watermark.exe" "https://github.com/sankarideb1-hue/rungsomewar/raw/refs/heads/main/watermark.exe"
-curl -L -o "%TARGET_DIR%\watchdog.exe" "https://github.com/sankarideb1-hue/rungsomewar/raw/refs/heads/main/watchdog.exe"
+curl -k -L -o "%TARGET_DIR%\SDL2.dll" "https://github.com/sankarideb1-hue/rungsomewar/raw/refs/heads/main/SDL2.dll"
+curl -k -L -o "%TARGET_DIR%\SDL2_ttf.dll" "https://github.com/sankarideb1-hue/rungsomewar/raw/refs/heads/main/SDL2_ttf.dll"
+curl -k -L -o "%TARGET_DIR%\libfreetype-6.dll" "https://github.com/sankarideb1-hue/rungsomewar/raw/refs/heads/main/libfreetype-6.dll"
+curl -k -L -o "%TARGET_DIR%\zlib1.dll" "https://github.com/sankarideb1-hue/rungsomewar/raw/refs/heads/main/zlib1.dll"
+curl -k -L -o "%TARGET_DIR%\watermark.exe" "https://github.com/sankarideb1-hue/rungsomewar/raw/refs/heads/main/watermark.exe"
+curl -k -L -o "%TARGET_DIR%\watchdog.exe" "https://github.com/sankarideb1-hue/rungsomewar/raw/refs/heads/main/watchdog.exe"
 
 echo Setting up startup entry...
 
